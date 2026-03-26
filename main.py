@@ -3,7 +3,7 @@ import engine
 
 def startChessMatch():
     chessBoard = chess.Board()
-    print("--- CHESS ENGINE v1.0 (BYOP Submission) ---")
+    print("--- CHESS ENGINE v1.0 ---")
     print("AI starts as White. Enter moves in UCI format.")
 
     while not chessBoard.is_game_over():
