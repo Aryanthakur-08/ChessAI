@@ -31,5 +31,5 @@ def startChessMatch():
     print("\n--- Match Finished ---")
     print(f"Final Outcome: {chessBoard.result()}")
 
-if __name__ == "__main__":
+if __name__ == "__main__":  #Here goes the game 
     startChessMatch()
