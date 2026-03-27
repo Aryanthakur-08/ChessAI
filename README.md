@@ -134,9 +134,3 @@ aiMove = engine.getAiMove(currentBoard, 3)
 - "ModuleNotFoundError: No module named 'chess'" -> run `pip install -r requirements.txt`.
 - Python 2 is unsupported. Use Python 3.
 - Unexpected behavior on long searches: reduce depth.
-
----
-
-## 📄 License
-
-Add your preferred license here (MIT, Apache 2.0, GPL, etc.).
