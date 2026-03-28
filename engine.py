@@ -1,73 +1,101 @@
 import chess
 
-# Piece values used for the evaluation
-pieceWeights = {
-    chess.PAWN: 100,
-    chess.KNIGHT: 320,
-    chess.BISHOP: 330,
-    chess.ROOK: 500,
-    chess.QUEEN: 900,
-    chess.KING: 20000
+
+Pawn = chess.PAWN
+Knight = chess.KNIGHT
+Bishop = chess.BISHOP
+Rook = chess.ROOK
+Queen = chess.QUEEN
+King = chess.KING
+
+
+pieceValues = {
+    Pawn: 100,
+    Knight: 320,
+    Bishop: 330,
+    Rook: 500,
+    Queen: 900,
+    King: 20000
 }
 
-def calculateScore(board):
+def getPositionRating(board):
     """
-    My custom function to see who is winning based on pieces.
+    This function looks at the board and gives a score.
+    Positive score = White is winning.
+    Negative score = Black is winning.
     """
     if board.is_checkmate():
-        # If it's White's turn and they are in checkmate, Black wins
-        return -99999 if board.turn == chess.WHITE else 99999
-    
+        # If it's White's turn and they are in mate, Black wins (-1M)
+        if board.turn == chess.WHITE:
+            return -1000000
+        else:
+            return 1000000
+            
     currentScore = 0
-    for pieceType, value in pieceWeights.items():
+    # Loop through each piece type and tally up the material
+    for pieceType, value in pieceValues.items():
         whiteCount = len(board.pieces(pieceType, chess.WHITE))
         blackCount = len(board.pieces(pieceType, chess.BLACK))
         currentScore += (whiteCount - blackCount) * value
         
     return currentScore
 
-def miniMax(board, depth, alpha, beta, isMaximizing):
+def runSearch(board, depth, alpha, beta, isMaximizing):
     """
-    The recursive search algorithm. 
-    I added Alpha-Beta pruning to make it run much faster.
+    The main Minimax algorithm with Alpha-Beta pruning.
+    It recursively checks future moves to find the best path.
     """
     if depth == 0 or board.is_game_over():
-        return calculateScore(board)
+        return getPositionRating(board)
 
     if isMaximizing:
-        maxEval = -1000000
+        bestScore = -1000000
         for move in board.legal_moves:
             board.push(move)
-            evalResult = miniMax(board, depth - 1, alpha, beta, False)
+            evalResult = runSearch(board, depth - 1, alpha, beta, False)
             board.pop()
-            maxEval = max(maxEval, evalResult)
+            
+            # Updating the best score and the alpha threshold
+            bestScore = max(bestScore, evalResult)
             alpha = max(alpha, evalResult)
+            
+            # Pruning: stop searching this branch if it's already worse
             if beta <= alpha:
-                break # Pruning the tree
-        return maxEval
+                break 
+        return bestScore
+    
     else:
-        minEval = 1000000
+        bestScore = 1000000
         for move in board.legal_moves:
             board.push(move)
-            evalResult = miniMax(board, depth - 1, alpha, beta, True)
+            evalResult = runSearch(board, depth - 1, alpha, beta, True)
             board.pop()
-            minEval = min(minEval, evalResult)
+            
+            # Updating the best score and the beta threshold
+            bestScore = min(bestScore, evalResult)
             beta = min(beta, evalResult)
+            
+            # Pruning logic
             if beta <= alpha:
-                break # Pruning the tree
-        return minEval
+                break 
+        return bestScore
 
-def getAiMove(board, currentDepth):
-    bestMove = None
-    bestValue = -1000000
+def selectMove(board, currentDepth):
+    """
+    This is the entry point called by main.py.
+    It picks the move that has the highest 'runSearch' score.
+    """
+    bestMoveFound = None
+    highestValue = -1000000
     
     for move in board.legal_moves:
         board.push(move)
-        boardValue = miniMax(board, currentDepth - 1, -1000000, 1000000, False)
+        # We start the recursive search one level deeper
+        moveValue = runSearch(board, currentDepth - 1, -1000000, 1000000, False)
         board.pop()
         
-        if boardValue > bestValue:
-            bestValue = boardValue
-            bestMove = move
+        if moveValue > highestValue:
+            highestValue = moveValue
+            bestMoveFound = move
             
-    return bestMove
+    return bestMoveFound
